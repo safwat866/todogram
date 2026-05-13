@@ -1,4 +1,4 @@
-import React, { useState,useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import TaskItem from "./TaskItem";
 import { getDocs, collection } from "firebase/firestore";
 import { db } from "../firebase";
@@ -16,15 +16,19 @@ const TasksWrapper = ({ user, tasks, onFetchTasks, onDeleteTask }) => {
   useEffect(() => {
     if (!user || !id) return;
     const loadCategory = async () => {
-      const ref = collection(db, "users", user.uid, "categories", id, "tasks");
-      const snap = await getDocs(ref);
-      console.log(snap.docs);
-      onFetchTasks(
-        snap.docs.map((task) => ({
-          id: task.id,
-          ...task.data(),
-        })),
-      );
+      try {
+        const ref = collection(db, `users/${user.uid}/categories/${id}/tasks`);
+        const snap = await getDocs(ref);
+        console.log(snap.docs);
+        onFetchTasks(
+          snap.docs.map((task) => ({
+            id: task.id,
+            ...task.data(),
+          })),
+        );
+      } catch (err) {
+        console.error("fetching categories error:", err);
+      }
     };
     loadCategory();
   }, [user, id]);

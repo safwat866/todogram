@@ -17,7 +17,7 @@ const TaskInput = ({ user, tasks, onAddTask }) => {
   };
 
   const handleSubmit = async () => {
-    if (!task) return;
+    if (!task || !id || !user) return;
 
     const taskObj = {
       value: task,
@@ -28,18 +28,11 @@ const TaskInput = ({ user, tasks, onAddTask }) => {
     // update ui immediatly
     onAddTask(taskObj);
     
-    const tasksRef = collection(
-      db,
-      "users",
-      user.uid,
-      "categories",
-      id,
-      "tasks",
-    );
+    const tasksRef = collection(db,`users/${user.uid}/categories/${id}/tasks`);
     try {
       await addDoc(tasksRef, taskObj);
     } catch (err) {
-      console.log(err.message);
+      console.error(err.message);
     }
   };
 
