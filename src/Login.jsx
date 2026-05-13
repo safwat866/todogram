@@ -23,23 +23,31 @@ export default function AuthPage() {
   const auth = getAuth();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        navigate("/task/init", { replace: true });
+    if (!isLogin && !credentials.username) return;
+
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (!user) return;
+      try {
+        const uid = user.uid;
+        await initUserDataWithCategory(uid, credentials.username);
+        navigate("/task/inbox", { replace: true });
+      } catch (err) {
+        console.error("Auth init failed:", err);
       }
     });
 
     return () => unsubscribe();
-  }, [navigate]);
+  }, [navigate, credentials.username]);
 
   const initUserDataWithCategory = async (uid, username) => {
+    if (isLogin) return;
     // store username
     await setDoc(doc(db, "users", uid), {
       username: username,
     });
     // after user authenticated successfuly create a new task category with id
     // and navigate user to this category
-    const docRef = await setDoc(doc(db, "users", uid, "categories", "init"), {
+    await setDoc(doc(db, "users", uid, "categories", "inbox"), {
       categoryName: "Inbox",
       icon: "📥",
     });
@@ -58,11 +66,7 @@ export default function AuthPage() {
         return;
       }
       try {
-        const userCredential = await signInWithEmailAndPassword(
-          auth,
-          email,
-          password,
-        );
+        await signInWithEmailAndPassword(auth, email, password);
       } catch (err) {
         setCredentials((prev) => ({
           ...prev,
@@ -79,15 +83,7 @@ export default function AuthPage() {
       }
 
       try {
-        const userCredential = await createUserWithEmailAndPassword(
-          auth,
-          email,
-          password,
-        );
-
-        const uid = userCredential.user.uid;
-
-        initUserDataWithCategory(uid, username);
+        await createUserWithEmailAndPassword(auth, email, password);
       } catch (err) {
         setCredentials((prev) => ({
           ...prev,

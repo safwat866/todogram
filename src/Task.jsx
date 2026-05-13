@@ -8,6 +8,8 @@ import { doc, deleteDoc } from "firebase/firestore";
 import { db } from "./firebase";
 import { useNavigate, useParams } from "react-router";
 
+const auth = getAuth();
+
 const Task = () => {
   const [tasks, setTasks] = useState([]);
   const [user, setUser] = useState();
@@ -59,6 +61,11 @@ const Task = () => {
     return () => unsubscribe();
   }, []);
 
+  const logout = async () => {
+    await signOut(auth);
+    navigate('/login')
+  }
+
   return (
     <div className="bg-slate-800 text-white h-dvh">
       <Header toggleMenu={toggleMenu} />
@@ -67,6 +74,7 @@ const Task = () => {
         setIsMenuHidden={toggleMenu}
         user={user}
       />
+      <button onClick={logout} className="p-2 bg-slate-900 cursor-pointer">logout test</button>
       <TasksWrapper
         user={user}
         tasks={tasks}
