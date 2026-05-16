@@ -3,7 +3,13 @@ import { motion, AnimatePresence } from "motion/react";
 import AsideMenuItem from "./AsideMenuItem";
 import { FaPlus } from "react-icons/fa";
 import { db } from "../firebase";
-import { collection, getDocs, doc , setDoc} from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  doc,
+  setDoc,
+  onSnapshot,
+} from "firebase/firestore";
 import { FaCheck } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
 
@@ -16,25 +22,35 @@ const AsideMenu = ({ isMenuHidden, setIsMenuHidden, user }) => {
 
   useEffect(() => {
     if (!user) return;
-    const fetchCategories = async () => {
-      const snapshot = await getDocs(
-        collection(db, "users", user.uid, "categories"),
-      );
-      console.log(snapshot.docs);
-      setCategories(
-        snapshot.docs.map((category) => ({
+    // const fetchCategories = async () => {
+    // const snapshot = await getDocs(
+    //   collection(db, "users", user.uid, "categories"),
+    // );
+    // setCategories(
+    //   snapshot.docs.map((category) => ({
+    //     id: category.id,
+    //     ...category.data(),
+    //   })),
+    // );
+    const categroiesRef = collection(db, `users/${user.uid}/categories`);
+    const unsub = onSnapshot(categroiesRef, (querySnapshot) => {
+      let categoriesArr = [];
+      querySnapshot.forEach((category) => {
+        categoriesArr.push({
           id: category.id,
           ...category.data(),
-        })),
-      );
-    };
-    fetchCategories();
+        });
+      });
+      setCategories(categoriesArr);
+    });
+    // };
+    // fetchCategories();
   }, [user]);
 
   const emojies = ["🛒", "🔒", "📚", "💻", "💭", "🛜", "🔗", "🤲"];
 
   const createCategoryHandler = () => {
-    setShowCreateCategoryInput(prev => !prev);
+    setShowCreateCategoryInput((prev) => !prev);
     setSelectedEmojie(null);
   };
 
@@ -43,18 +59,19 @@ const AsideMenu = ({ isMenuHidden, setIsMenuHidden, user }) => {
     setShowCreateCategoryInput(false);
 
     const newCategory = {
-        categoryName: categoryInput,
-        icon: selectedEmojie || "✏️",
-      };
+      categoryName: categoryInput,
+      icon: selectedEmojie || "✏️",
+    };
 
-    setCategories((prev) => [...prev, newCategory]);
+    // setCategories((prev) => [...prev, newCategory]);
+
     // post category to db
     const categoriesRef = doc(collection(db, "users", user.uid, "categories"));
     await setDoc(categoriesRef, newCategory);
     // reset
     setCategoryInput("");
     setSelectedEmojie(null);
-  }
+  };
 
   return (
     <>
@@ -121,9 +138,14 @@ const AsideMenu = ({ isMenuHidden, setIsMenuHidden, user }) => {
                   placeholder="Category Name"
                   className="border rounded flex-1 block p-1"
                   value={categoryInput}
-                  onChange={(e) => {setCategoryInput(e.target.value)}}
+                  onChange={(e) => {
+                    setCategoryInput(e.target.value);
+                  }}
                 />
-                <button onClick={submitCategoryHandler} className="text-xl bg-slate-500 px-1 rounded-lg">
+                <button
+                  onClick={submitCategoryHandler}
+                  className="text-xl bg-slate-500 px-1 rounded-lg"
+                >
                   <FaCheck />
                 </button>
               </div>

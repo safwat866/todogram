@@ -7,7 +7,7 @@ import {
   signInWithPopup,
   onAuthStateChanged,
 } from "firebase/auth";
-import { doc, setDoc, collection, addDoc } from "firebase/firestore";
+import { doc, setDoc, collection, addDoc, getDoc } from "firebase/firestore";
 import { db, auth, provider } from "./firebase";
 import { useNavigate } from "react-router";
 
@@ -19,6 +19,7 @@ export default function AuthPage() {
     validation_error: "",
   });
   const [isLogin, setIsLogin] = useState(true);
+  const [isGoogleLogin, setIsGoogleLogin] = useState(false);
   const navigate = useNavigate();
   const auth = getAuth();
 
@@ -29,8 +30,10 @@ export default function AuthPage() {
       if (!user) return;
       try {
         const uid = user.uid;
-        await initUserDataWithCategory(uid, credentials.username);
-        navigate("/task/inbox", { replace: true });
+        const userIsCreated = await getDoc(doc(db, "users", uid));
+        if (!userIsCreated.exists())
+          await initUserDataWithCategory(uid, credentials.username);
+          navigate("/task/inbox", { replace: true });
       } catch (err) {
         console.error("Auth init failed:", err);
       }
@@ -40,7 +43,10 @@ export default function AuthPage() {
   }, [navigate, credentials.username]);
 
   const initUserDataWithCategory = async (uid, username) => {
-    if (isLogin) return;
+    if (!isGoogleLogin) {
+      if (isLogin) return;
+    }
+
     // store username
     await setDoc(doc(db, "users", uid), {
       username: username,
@@ -95,6 +101,7 @@ export default function AuthPage() {
 
   const handleGoogleSignIn = async () => {
     try {
+      setIsGoogleLogin(true);
       await signInWithPopup(auth, provider);
     } catch (err) {
       setCredentials((prev) => ({

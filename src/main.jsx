@@ -7,7 +7,7 @@ import Task from './Task'
 
 
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
+
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
@@ -15,5 +15,5 @@ createRoot(document.getElementById("root")).render(
         <Route path="/task/:id" element={<Task />} />
       </Routes>
     </BrowserRouter>
-  </StrictMode>,
+
 );
