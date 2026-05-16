@@ -16,6 +16,15 @@ const TaskInput = ({ user, tasks, onAddTask }) => {
     input.style.height = input.scrollHeight + "px"; // grow
   };
 
+  const isMobileDevice = () => {
+    if (typeof window === "undefined") return false;
+    return (
+      "ontouchstart" in window ||
+      navigator.maxTouchPoints > 0 ||
+      window.matchMedia("(max-width: 768px)").matches
+    );
+  };
+
   const handleSubmit = async () => {
     if (!task || !id || !user) return;
 
@@ -27,8 +36,8 @@ const TaskInput = ({ user, tasks, onAddTask }) => {
     setTask("");
     // update ui immediatly
     // onAddTask(taskObj);
-    
-    const tasksRef = collection(db,`users/${user.uid}/categories/${id}/tasks`);
+
+    const tasksRef = collection(db, `users/${user.uid}/categories/${id}/tasks`);
     try {
       await addDoc(tasksRef, taskObj);
     } catch (err) {
@@ -48,6 +57,7 @@ const TaskInput = ({ user, tasks, onAddTask }) => {
           value={task}
           onChange={(e) => handleTaskInput(e)}
           onKeyDown={(e) => {
+            if (isMobileDevice()) return;
             if (e.key == "Enter" && !e.shiftKey) {
               e.preventDefault();
               handleSubmit();

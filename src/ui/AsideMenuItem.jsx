@@ -1,7 +1,7 @@
 import React from 'react'
 import { NavLink } from "react-router";
 
-const AsideMenuItem = ({categ, icon, to}) => {
+const AsideMenuItem = ({categ, icon, to, setMenu}) => {
   return (
     <NavLink
       to={to}
@@ -9,6 +9,7 @@ const AsideMenuItem = ({categ, icon, to}) => {
       style={({ isActive }) => ({
         backgroundColor: isActive ? "#314158" : "",
       })}
+      onClick={() => setMenu(false)}
     >
       <span className="pr-3 text-xl">{icon}</span> {categ}
     </NavLink>

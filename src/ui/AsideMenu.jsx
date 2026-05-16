@@ -82,7 +82,7 @@ const AsideMenu = ({ isMenuHidden, setIsMenuHidden, user }) => {
       {/* Sidebar */}
       <div
         className={
-          "absolute left-0 top-0 h-dvh w-70 bg-slate-800 shadow-2xl z-50 " +
+          "absolute left-0 top-0 h-dvh w-80 bg-slate-800 shadow-2xl z-50 " +
           "transition-transform duration-300 ease-in-out  " +
           (isMenuHidden ? "-translate-x-full" : "translate-x-0")
         }
@@ -93,6 +93,7 @@ const AsideMenu = ({ isMenuHidden, setIsMenuHidden, user }) => {
             {categories &&
               categories.map((category) => (
                 <AsideMenuItem
+                  setMenu={(e) => setIsMenuHidden(e)}
                   key={category.id}
                   categ={category.categoryName}
                   icon={category.icon}
