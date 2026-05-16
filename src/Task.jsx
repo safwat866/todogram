@@ -27,17 +27,9 @@ const Task = () => {
   };
 
   const onDeleteTask = async (taskId) => {
-    // remove from ui
-    setTasks(tasks.filter((task) => task.id != taskId));
-    // delete from db
     const taskDoc = doc(
       db,
-      "users",
-      user.uid,
-      "categories",
-      id,
-      "tasks",
-      taskId,
+      `users/${user.uid}/categories/${id}/tasks/${taskId}`,
     );
     await deleteDoc(taskDoc);
   };
@@ -63,8 +55,8 @@ const Task = () => {
 
   const logout = async () => {
     await signOut(auth);
-    navigate('/login')
-  }
+    navigate("/login");
+  };
 
   return (
     <div className="bg-slate-800 text-white h-dvh">

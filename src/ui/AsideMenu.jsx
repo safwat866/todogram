@@ -22,16 +22,6 @@ const AsideMenu = ({ isMenuHidden, setIsMenuHidden, user }) => {
 
   useEffect(() => {
     if (!user) return;
-    // const fetchCategories = async () => {
-    // const snapshot = await getDocs(
-    //   collection(db, "users", user.uid, "categories"),
-    // );
-    // setCategories(
-    //   snapshot.docs.map((category) => ({
-    //     id: category.id,
-    //     ...category.data(),
-    //   })),
-    // );
     const categroiesRef = collection(db, `users/${user.uid}/categories`);
     const unsub = onSnapshot(categroiesRef, (querySnapshot) => {
       let categoriesArr = [];
@@ -42,9 +32,11 @@ const AsideMenu = ({ isMenuHidden, setIsMenuHidden, user }) => {
         });
       });
       setCategories(categoriesArr);
+
     });
-    // };
-    // fetchCategories();
+     return () => {
+       unsub();
+     };
   }, [user]);
 
   const emojies = ["🛒", "🔒", "📚", "💻", "💭", "🛜", "🔗", "🤲"];
@@ -62,8 +54,6 @@ const AsideMenu = ({ isMenuHidden, setIsMenuHidden, user }) => {
       categoryName: categoryInput,
       icon: selectedEmojie || "✏️",
     };
-
-    // setCategories((prev) => [...prev, newCategory]);
 
     // post category to db
     const categoriesRef = doc(collection(db, "users", user.uid, "categories"));

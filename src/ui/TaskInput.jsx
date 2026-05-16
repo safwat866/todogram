@@ -26,7 +26,7 @@ const TaskInput = ({ user, tasks, onAddTask }) => {
 
     setTask("");
     // update ui immediatly
-    onAddTask(taskObj);
+    // onAddTask(taskObj);
     
     const tasksRef = collection(db,`users/${user.uid}/categories/${id}/tasks`);
     try {
