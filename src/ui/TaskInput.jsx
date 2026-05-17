@@ -21,7 +21,6 @@ const TaskInput = ({ user, tasks, onAddTask }) => {
     if (e.key == "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSubmit();
-      taskInput.current.style.height = "auto";
     }
   };
 
