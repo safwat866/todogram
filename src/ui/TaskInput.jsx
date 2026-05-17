@@ -16,17 +16,23 @@ const TaskInput = ({ user, tasks, onAddTask }) => {
     input.style.height = input.scrollHeight + "px"; // grow
   };
 
+  const handleKeyDown = (e) => {
+    if (isMobileDevice()) return;
+    if (e.key == "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit();
+      taskInput.current.style.height = "auto";
+    }
+  };
+
   const isMobileDevice = () => {
     if (typeof window === "undefined") return false;
-    return (
-      "ontouchstart" in window ||
-      navigator.maxTouchPoints > 0 ||
-      window.matchMedia("(max-width: 768px)").matches
-    );
+    return "ontouchstart" in window || navigator.maxTouchPoints > 0;
   };
 
   const handleSubmit = async () => {
     if (!task || !id || !user) return;
+    taskInput.current.style.height = "auto";
 
     const taskObj = {
       value: task,
@@ -56,14 +62,7 @@ const TaskInput = ({ user, tasks, onAddTask }) => {
           className="flex-1 bg-gray-900 text-white placeholder-gray-400 resize-none outline-none max-h-40 rounded-lg py-3 px-5"
           value={task}
           onChange={(e) => handleTaskInput(e)}
-          onKeyDown={(e) => {
-            if (isMobileDevice()) return;
-            if (e.key == "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              handleSubmit();
-              taskInput.current.style.height = "auto";
-            }
-          }}
+          onKeyDown={(e) => handleKeyDown(e)}
         />
 
         {/* Send Button */}
