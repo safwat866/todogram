@@ -2,7 +2,6 @@ import { defineConfig } from "vite";
 import tailwindcss from "@tailwindcss/vite";
 import { VitePWA } from "vite-plugin-pwa";
 
-
 export default defineConfig({
   plugins: [
     tailwindcss(),
@@ -20,17 +19,13 @@ export default defineConfig({
             src: "/logo.png",
             sizes: "192x192",
             type: "image/png",
+            purpose: "any",
           },
           {
             src: "/logo.png",
             sizes: "512x512",
             type: "image/png",
-          },
-          {
-            src: "/logo.png",
-            sizes: "512x512",
-            type: "image/png",
-            purpose: "maskable",
+            purpose: "any maskable", // Combines both purposes in a single declaration
           },
         ],
       },
