@@ -16,22 +16,22 @@ export default defineConfig({
         theme_color: "#0F172A",
         icons: [
           {
-            src: "/logo.png",
-            sizes: "192x192",
+            src: "/logo-512.jpg",
+            sizes: "512x512",
             type: "image/png",
             purpose: "any",
           },
           {
-            src: "/logo.png",
+            src: "/logo-512.jpg",
             sizes: "512x512",
             type: "image/png",
-            purpose: "any maskable", // Combines both purposes in a single declaration
+            purpose: "maskable",
           },
         ],
       },
-      // devOptions: {
-      //   enabled: true,
-      // },
+      devOptions: {
+        enabled: true,
+      },
     }),
   ],
 });
