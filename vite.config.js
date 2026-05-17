@@ -11,14 +11,19 @@ export default defineConfig({
       manifest: {
         name: "Todogram",
         short_name: "Todogram",
-        start_url: "/",
+        start_url: "/task/inbox",
         display: "standalone",
-        background_color: "#ffffff",
-        theme_color: "#000000",
+        background_color: "#1E293B",
+        theme_color: "#0F172A",
         icons: [
           {
             src: "/logo.png",
             sizes: "192x192",
+            type: "image/png",
+          },
+          {
+            src: "/logo.png",
+            sizes: "512x512",
             type: "image/png",
           },
         ],
