@@ -8,7 +8,7 @@ const TaskItem = ({ value, id, onDeleteTask }) => {
       onClick={() => {
         setShowDeleteIcon((prev) => !prev);
       }}
-      className="select-none rounded-lg bg-[#2563eb] px-3 py-1 min-w-40 flex flex-col relative whitespace-pre-wrap"
+      className="select-none rounded-lg bg-[#2563eb] px-3 py-1 min-w-40 flex flex-col relative whitespace-pre-line"
     >
       {value}
       <span className="text-mist-200 text-[12px] text-right">3:56 pm</span>
