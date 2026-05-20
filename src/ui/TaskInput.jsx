@@ -33,6 +33,8 @@ const TaskInput = ({ user }) => {
     if (!task || !id || !user) return;
     taskInput.current.style.height = "auto";
 
+    taskInput.current.focus();
+
     const taskObj = {
       value: task,
       sendDate: serverTimestamp(),
