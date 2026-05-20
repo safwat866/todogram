@@ -1,218 +1,220 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import {useState, useEffect} from "react";
+import {Link} from "react-router-dom";
 import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  getAuth,
-  signInWithPopup,
-  onAuthStateChanged,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    getAuth,
+    signInWithPopup,
+    onAuthStateChanged,
 } from "firebase/auth";
-import { doc, setDoc, collection, addDoc, getDoc } from "firebase/firestore";
-import { db, auth, provider } from "./firebase";
-import { useNavigate } from "react-router";
+import {doc, setDoc, collection, addDoc, getDoc} from "firebase/firestore";
+import {db, auth, provider} from "./firebase";
+import {useNavigate} from "react-router";
 
 export default function AuthPage() {
-  const [credentials, setCredentials] = useState({
-    username: "",
-    email: "",
-    password: "",
-    validation_error: "",
-  });
-  const [isLogin, setIsLogin] = useState(true);
-  const [isGoogleLogin, setIsGoogleLogin] = useState(false);
-  const navigate = useNavigate();
-  const auth = getAuth();
-
-  useEffect(() => {
-    if (!isLogin && !credentials.username) return;
-
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) return;
-      try {
-        const uid = user.uid;
-        const userIsCreated = await getDoc(doc(db, "users", uid));
-        if (!userIsCreated.exists())
-          await initUserDataWithCategory(uid, credentials.username);
-          navigate("/task/inbox", { replace: true });
-      } catch (err) {
-        console.error("Auth init failed:", err);
-      }
+    const [credentials, setCredentials] = useState({
+        username: "",
+        email: "",
+        password: "",
+        validation_error: "",
     });
+    const [isLogin, setIsLogin] = useState(true);
+    const navigate = useNavigate();
+    const auth = getAuth();
 
-    return () => unsubscribe();
-  }, [navigate, credentials.username]);
+    useEffect(() => {
+        if (!isLogin && !credentials.username) return;
 
-  const initUserDataWithCategory = async (uid, username) => {
-    if (!isGoogleLogin) {
-      if (isLogin) return;
-    }
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            if (!user) return;
+            try {
+                const uid = user.uid;
+                const userIsCreated = await getDoc(doc(db, "users", uid));
+                if (!userIsCreated.exists()) {
+                    const isGoogleProvider = user.providerData.some(
+                        (p) => p.providerId === "google.com"
+                    );
+                    await initUserDataWithCategory(uid, credentials.username, isGoogleProvider);
+                }
+                navigate("/task/inbox", {replace: true});
+            } catch (err) {
+                console.error("Auth init failed:", err);
+            }
+        });
 
-    // store username
-    await setDoc(doc(db, "users", uid), {
-      username: username,
-    });
-    // after user authenticated successfuly create a new task category with id
-    // and navigate user to this category
-    await setDoc(doc(db, "users", uid, "categories", "inbox"), {
-      categoryName: "Inbox",
-      icon: "📥",
-    });
-  };
+        return () => unsubscribe();
+    }, [navigate, credentials.username]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const { email, password, username } = credentials;
+    const initUserDataWithCategory = async (uid, username, isGoogleLogin) => {
+        if (!isGoogleLogin) {
+            if (isLogin) return;
+        }
 
-    if (isLogin) {
-      if (!email || !password) {
-        setCredentials((prev) => ({
-          ...prev,
-          validation_error: "you have to enter email and password!",
-        }));
-        return;
-      }
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-      } catch (err) {
-        setCredentials((prev) => ({
-          ...prev,
-          validation_error: err.message,
-        }));
-      }
-    } else {
-      if (!username || !email || !password) {
-        setCredentials((prev) => ({
-          ...prev,
-          validation_error: "you have to enter username email and password!",
-        }));
-        return;
-      }
+        // store username
+        await setDoc(doc(db, "users", uid), {
+            username: username,
+        });
+        // after user authenticated successfuly create a new task category with id
+        // and navigate user to this category
+        await setDoc(doc(db, "users", uid, "categories", "inbox"), {
+            categoryName: "Inbox",
+            icon: "📥",
+        });
+    };
 
-      try {
-        await createUserWithEmailAndPassword(auth, email, password);
-      } catch (err) {
-        setCredentials((prev) => ({
-          ...prev,
-          validation_error: err.message,
-        }));
-      }
-    }
-  };
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const {email, password, username} = credentials;
 
-  const handleGoogleSignIn = async () => {
-    try {
-      setIsGoogleLogin(true);
-      await signInWithPopup(auth, provider);
-    } catch (err) {
-      setCredentials((prev) => ({
-        ...prev,
-        validation_error: err.message,
-      }));
-    }
-  };
-
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900 transition-colors">
-      <div className="w-full max-w-md mb-20 rounded-2xl p-8 transition-colors">
-        {/* Title */}
-        <h2 className="text-3xl font-bold text-center text-gray-800 dark:text-white mb-10">
-          Welcome Back
-        </h2>
-
-        {/* Form */}
-        <form className="space-y-4" onSubmit={(e) => handleSubmit(e)}>
-          {/* Username (only for register) */}
-          {!isLogin && (
-            <input
-              type="text"
-              placeholder="Username"
-              onChange={(e) => {
+        if (isLogin) {
+            if (!email || !password) {
                 setCredentials((prev) => ({
-                  ...prev,
-                  username: e.target.value,
-                  validation_error: "",
+                    ...prev,
+                    validation_error: "you have to enter email and password!",
                 }));
-              }}
-              value={credentials.username}
-              className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
-            />
-          )}
+                return;
+            }
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (err) {
+                setCredentials((prev) => ({
+                    ...prev,
+                    validation_error: err.message,
+                }));
+            }
+        } else {
+            if (!username || !email || !password) {
+                setCredentials((prev) => ({
+                    ...prev,
+                    validation_error: "you have to enter username email and password!",
+                }));
+                return;
+            }
 
-          {/* Email */}
-          <input
-            type="email"
-            placeholder="Email"
-            onChange={(e) => {
-              setCredentials((prev) => ({
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+            } catch (err) {
+                setCredentials((prev) => ({
+                    ...prev,
+                    validation_error: err.message,
+                }));
+            }
+        }
+    };
+
+    const handleGoogleSignIn = async () => {
+        try {
+            await signInWithPopup(auth, provider);
+        } catch (err) {
+            setCredentials((prev) => ({
                 ...prev,
-                email: e.target.value,
-                validation_error: "",
-              }));
-            }}
-            value={credentials.email}
-            className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
-          />
+                validation_error: err.message,
+            }));
+        }
+    };
 
-          {/* Password */}
-          <input
-            type="password"
-            placeholder="Password"
-            onChange={(e) => {
-              setCredentials((prev) => ({
-                ...prev,
-                password: e.target.value,
-                validation_error: "",
-              }));
-            }}
-            value={credentials.password}
-            className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
-          />
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900 transition-colors">
+            <div className="w-full max-w-md mb-20 rounded-2xl p-8 transition-colors">
+                {/* Title */}
+                <h2 className="text-3xl font-bold text-center text-gray-800 dark:text-white mb-10">
+                    Welcome Back
+                </h2>
 
-          {/* Submit */}
-          <button className="w-full bg-black dark:bg-white text-white dark:text-black py-3 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-200 transition block text-center">
-            {isLogin ? "Login" : "Create Account"}
-          </button>
-          {credentials.validation_error && (
-            <p className="text-red-500 text-center">
-              {credentials.validation_error}
-            </p>
-          )}
-        </form>
+                {/* Form */}
+                <form className="space-y-4" onSubmit={(e) => handleSubmit(e)}>
+                    {/* Username (only for register) */}
+                    {!isLogin && (
+                        <input
+                            type="text"
+                            placeholder="Username"
+                            onChange={(e) => {
+                                setCredentials((prev) => ({
+                                    ...prev,
+                                    username: e.target.value,
+                                    validation_error: "",
+                                }));
+                            }}
+                            value={credentials.username}
+                            className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
+                        />
+                    )}
 
-        {/* Divider */}
-        <div className="flex items-center my-6">
-          <div className="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
-          <span className="px-3 text-gray-500 dark:text-gray-400 text-sm">
+                    {/* Email */}
+                    <input
+                        type="email"
+                        placeholder="Email"
+                        onChange={(e) => {
+                            setCredentials((prev) => ({
+                                ...prev,
+                                email: e.target.value,
+                                validation_error: "",
+                            }));
+                        }}
+                        value={credentials.email}
+                        className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
+                    />
+
+                    {/* Password */}
+                    <input
+                        type="password"
+                        placeholder="Password"
+                        onChange={(e) => {
+                            setCredentials((prev) => ({
+                                ...prev,
+                                password: e.target.value,
+                                validation_error: "",
+                            }));
+                        }}
+                        value={credentials.password}
+                        className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
+                    />
+
+                    {/* Submit */}
+                    <button className="w-full bg-black dark:bg-white text-white dark:text-black py-3 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-200 transition block text-center">
+                        {isLogin ? "Login" : "Create Account"}
+                    </button>
+                    {credentials.validation_error && (
+                        <p className="text-red-500 text-center">
+                            {credentials.validation_error}
+                        </p>
+                    )}
+                </form>
+
+                {/* Divider */}
+                <div className="flex items-center my-6">
+                    <div className="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
+                    <span className="px-3 text-gray-500 dark:text-gray-400 text-sm">
             or
           </span>
-          <div className="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
+                    <div className="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
+                </div>
+
+                {/* Google Login */}
+                <button
+                    onClick={handleGoogleSignIn}
+                    className="w-full border border-gray-300 dark:border-gray-600 py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition text-gray-800 dark:text-white"
+                >
+                    <img
+                        src="https://www.svgrepo.com/show/355037/google.svg"
+                        className="w-5 h-5"
+                        alt="google"
+                    />
+                    Continue with Google
+                </button>
+
+                {/* Toggle */}
+                <p className="text-center mt-6 text-sm text-gray-600 dark:text-gray-300">
+                    {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
+                    <button
+                        type="button"
+                        onClick={() => setIsLogin(!isLogin)}
+                        className="text-black dark:text-white font-semibold hover:underline"
+                    >
+                        {isLogin ? "Sign up" : "Login"}
+                    </button>
+                </p>
+            </div>
         </div>
-
-        {/* Google Login */}
-        <button
-          onClick={handleGoogleSignIn}
-          className="w-full border border-gray-300 dark:border-gray-600 py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700 transition text-gray-800 dark:text-white"
-        >
-          <img
-            src="https://www.svgrepo.com/show/355037/google.svg"
-            className="w-5 h-5"
-            alt="google"
-          />
-          Continue with Google
-        </button>
-
-        {/* Toggle */}
-        <p className="text-center mt-6 text-sm text-gray-600 dark:text-gray-300">
-          {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
-          <button
-            type="button"
-            onClick={() => setIsLogin(!isLogin)}
-            className="text-black dark:text-white font-semibold hover:underline"
-          >
-            {isLogin ? "Sign up" : "Login"}
-          </button>
-        </p>
-      </div>
-    </div>
-  );
+    );
 }

@@ -10,7 +10,7 @@ createRoot(document.getElementById("root")).render(
 
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<Navigate to="/task/inbox" replace />} />
         <Route path="/login" element={<Login />} />
         <Route path="/task/:id" element={<Task />} />
       </Routes>
