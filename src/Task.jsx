@@ -66,7 +66,7 @@ const Task = () => {
         setIsMenuHidden={toggleMenu}
         user={user}
       />
-       <button onClick={logout} className="p-2 bg-slate-900 cursor-pointer">logout test</button>
+        {import.meta.env.DEV && <button onClick={logout} className="p-2 bg-slate-900 cursor-pointer">logout test</button>}
       <TasksWrapper
         user={user}
         tasks={tasks}
