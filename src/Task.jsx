@@ -60,7 +60,7 @@ const Task = () => {
 
   return (
     <div className="bg-slate-800 text-white h-dvh">
-      <Header toggleMenu={toggleMenu} />
+      <Header toggleMenu={toggleMenu} user={user} id={id} />
       <AsideMenu
         isMenuHidden={menuHidden}
         setIsMenuHidden={toggleMenu}
