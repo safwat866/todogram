@@ -75,8 +75,6 @@ const Task = () => {
       />
       <TaskInput
         user={user}
-        tasks={tasks}
-        onAddTask={(value) => onAddTask(value)}
       />
     </div>
   );

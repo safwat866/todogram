@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import TaskItem from "./TaskItem";
-import { getDocs, collection, onSnapshot } from "firebase/firestore";
+import {  collection, onSnapshot, query, orderBy } from "firebase/firestore";
 import { db } from "../firebase";
 import { useParams } from "react-router";
 
@@ -16,7 +16,10 @@ const TasksWrapper = ({ user, tasks, onFetchTasks, onDeleteTask }) => {
   useEffect(() => {
     if (!user || !id) return;
     const tasksRef = collection(db, `users/${user.uid}/categories/${id}/tasks`);
-    const unsub = onSnapshot(tasksRef, (snapshot) => {
+
+    const q = query(tasksRef, orderBy("sendDate", "asc"));
+
+    const unsub = onSnapshot(q, (snapshot) => {
       let tasksArr = [];
       snapshot.forEach((task) => {
         tasksArr.push({
@@ -44,6 +47,7 @@ const TasksWrapper = ({ user, tasks, onFetchTasks, onDeleteTask }) => {
               key={task.id}
               id={task.id}
               value={task.value}
+              timestamp={task.sendDate}
               onDeleteTask={onDeleteTask}
             />
           ))}

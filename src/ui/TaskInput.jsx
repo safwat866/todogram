@@ -1,10 +1,10 @@
 import React, { useRef, useState } from "react";
 import { IoSend } from "react-icons/io5";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useParams } from "react-router";
 import { db } from "../firebase";
 
-const TaskInput = ({ user, tasks, onAddTask }) => {
+const TaskInput = ({ user }) => {
   const taskInput = useRef("");
   const [task, setTask] = useState("");
   const { id } = useParams();
@@ -35,12 +35,10 @@ const TaskInput = ({ user, tasks, onAddTask }) => {
 
     const taskObj = {
       value: task,
-      sendDate: new Date(),
+      sendDate: serverTimestamp(),
     };
 
     setTask("");
-    // update ui immediatly
-    // onAddTask(taskObj);
 
     const tasksRef = collection(db, `users/${user.uid}/categories/${id}/tasks`);
     try {
